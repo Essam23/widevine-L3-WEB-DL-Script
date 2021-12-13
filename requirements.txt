@@ -1,2 +1,9 @@
-pyfiglet==0.8.post1
-rich==10.6.0
+google
+google-api-python-client
+protobuf
+pycryptodome
+pycryptodomex
+pyfiglet
+requests
+rich
+xmltodict
