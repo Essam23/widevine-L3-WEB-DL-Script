@@ -133,35 +133,14 @@ correct, keys = WV_Function(pssh, lic_url)
 
 try:
     os.remove("keys.txt")
-    os.remove("keys.json")
 except:
     pass
-
 
 
 for key in keys:
     print('KID:KEY -> ' + key)
     with open('keys.txt', 'a+', encoding='utf8') as (file):
         file.write(key + '\n')
-
-
-res = []
-with open('keys.txt') as f:
-    for line in f:
-        kid, hex_key = line.strip().split(':')
-        res.append({'kid': kid, 'hex_key': hex_key})
-    out_file = open("keys.json", "w")
-    json.dump(res, out_file, indent = 1)
-    out_file.close()
-
-
-with open("keys.json") as json_data:
-    config = json.load(json_data)
-    keys = ""
-    for i in range(len(config)):
-        keys += f"--key {config[i]['kid']}:{config[i]['hex_key']} "
-
-
 
 print(f'Selected MPD : {mpd_url}\n')
 subprocess.run([m3u8DLexe, mpd_url, '--enableDelAfterDone', '--enableMuxFastStart', '--workDir', dirPath, '--saveName', 'encrypted'])
@@ -171,6 +150,16 @@ for filename in os.listdir("."):
     if filename.startswith("encrypted."):
         os.rename(filename, "encrypted_video.mp4")    
 
+with open("keys.txt", 'r') as f:
+    file = f.readlines()
+
+length = len(file)
+for x in str(length):
+    keys = ""
+    for i in range(0, length):
+        key = file[i][33 : 65]
+        kid = file[i][0 : 32]
+        keys += f'--key {kid}:{key} '
 
 print("\nDecrypting .....")
 subprocess.run(f'{mp4decryptexe} --show-progress {keys} encrypted_audio.m4a decrypted_audio.m4a', shell=True)
@@ -194,5 +183,4 @@ os.remove("encrypted_video.mp4")
 os.remove("decrypted_audio.m4a")
 os.remove("decrypted_video.mp4")
 os.remove("keys.txt")
-os.remove("keys.json")
 
