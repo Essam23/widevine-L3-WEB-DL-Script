@@ -26,8 +26,6 @@ arguments = argparse.ArgumentParser()
 # arguments.add_argument("-m", "--video-link", dest="mpd", help="MPD url")
 arguments.add_argument("-o", '--output', dest="output", help="Specify output file name with no extension", required=True)
 arguments.add_argument("-s", dest="subtitle", help="enter subtitle url")
-arguments.add_argument("-k", dest="keyfile", action='store_true', help="Use keyfile with the same name as specified output")
-arguments.add_argument("-d", dest="delenc", action='store_true', help="Delete encoded AND JSON FILE upon completion")
 args = arguments.parse_args()
 
 currentFile = __file__
@@ -157,21 +155,11 @@ with open('keys.txt') as f:
     out_file.close()
 
 
-if args.keyfile:
-    keyfile = str(args.output) + ".json"
-else:
-    keyfile = "keys.json"
-
-with open(keyfile) as json_data:
+with open("keys.json") as json_data:
     config = json.load(json_data)
-    try:
-        keys = ""
-        for i in range(1, len(config)):
-            keys += f"--key {config[i]['kid']}:{config[i]['hex_key']} "
-    except:
-        keys = ""
-        for i in range(1, len(config)-1):
-            keys += f"--key {config[i]['kid']}:{config[i]['hex_key']} "
+    keys = ""
+    for i in range(len(config)):
+        keys += f"--key {config[i]['kid']}:{config[i]['hex_key']} "
 
 
 
@@ -201,22 +189,10 @@ else:
     subprocess.run([mkvmergeexe, '--ui-language' ,'en', '--output', output +'.mkv', '--language', '0:eng', '--default-track', '0:yes', '--compression', '0:none', 'decrypted_video.mp4', '--language', '0:eng', '--default-track', '0:yes', '--compression' ,'0:none', 'decrypted_audio.m4a','--language', '0:eng','--track-order', '0:0,1:0,2:0,3:0,4:0'])
     print("\nAll Done .....")    
 
-if args.delenc:
-    delete_choice = 1
-    if os.path.isfile(output + ".mkv"):
-        os.remove(keyfile)
-else:
-    print("\nDo you want to delete the Encrypted Files : Press 1 for yes , 2 for no")
-    delete_choice = int(input("Enter Response : "))
+os.remove("encrypted_audio.m4a")
+os.remove("encrypted_video.mp4")
+os.remove("decrypted_audio.m4a")
+os.remove("decrypted_video.mp4")
+os.remove("keys.txt")
+os.remove("keys.json")
 
-if delete_choice == 1:
-    os.remove("encrypted_audio.m4a")
-    os.remove("encrypted_video.mp4")
-    os.remove("decrypted_audio.m4a")
-    os.remove("decrypted_video.mp4")
-    try:    
-        os.remove("en.srt")
-    except:
-        pass
-else:
-    pass
